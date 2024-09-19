@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class EnemyMovment : MonoBehaviour
+public class EnemyMover : MonoBehaviour
 {
     [SerializeField] private Transform[] _targetPoint;
     [SerializeField] private float _speed;
@@ -15,6 +15,7 @@ public class EnemyMovment : MonoBehaviour
             transform.Rotate(0, 180, 0,Space.World);
         }
 
-        transform.position = Vector3.MoveTowards(transform.position, _targetPoint[_currentPoint].position, _speed * Time.fixedDeltaTime);
+        transform.position = Vector3.MoveTowards(transform.position,
+            _targetPoint[_currentPoint].position, _speed * Time.fixedDeltaTime);
     }
 }

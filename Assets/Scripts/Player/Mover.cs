@@ -3,7 +3,7 @@ using UnityEngine;
 public class Mover : MonoBehaviour
 {
     [SerializeField] private float _jumpForce;
-    [SerializeField] private Vector3 _direction;
+    [SerializeField] private float _speed;
 
     private Rigidbody2D _rigidbody;
 
@@ -18,13 +18,13 @@ public class Mover : MonoBehaviour
         _rigidbody.AddForce(new Vector2(0, _jumpForce));
     }
 
-    public void Move(float direction)
+    public void Move(float inputDirectional)
     {
-        if (direction < 0)
+        if (inputDirectional < 0)
             transform.rotation = Quaternion.Euler(0, 0, 0);
         else
             transform.rotation = Quaternion.Euler(0, 180, 0);
 
-        transform.Translate(_direction * direction * Time.deltaTime, Space.World);
+        _rigidbody.velocity = new Vector2(inputDirectional * _speed, _rigidbody.velocity.y);
     }
 }

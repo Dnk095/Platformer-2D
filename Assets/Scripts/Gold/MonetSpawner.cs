@@ -28,16 +28,13 @@ public class MonetSpawner : MonoBehaviour
 
     private SpawnPoint GetRandomPoint()
     {
-        SpawnPoint spawnPoint = _spawnPoints[Random.Range(0, _spawnPoints.Length)];
+        SpawnPoint[] spawnPoint = _spawnPoints.Where(point => point.CanSpawn == true).ToArray();
 
-        while (spawnPoint.CanSpawn == false)
-            spawnPoint = _spawnPoints[Random.Range(0, _spawnPoints.Length)];
-
-        return spawnPoint;
+        return spawnPoint[Random.Range(0, spawnPoint.Length)];
     }
 
     private bool CheckAllPionts()
     {
-        return  _spawnPoints.Any(x => x.CanSpawn == true);
+        return _spawnPoints.Any(x => x.CanSpawn == true);
     }
 }

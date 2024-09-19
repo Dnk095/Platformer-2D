@@ -9,7 +9,9 @@ public class Wallet : MonoBehaviour
 
     public void AddMoney()
     {
-        _money+=1;
+        int additionalMoney = 1;
+
+        _money += additionalMoney;
         ChangeMoney?.Invoke(_money);
     }
 }

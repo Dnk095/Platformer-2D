@@ -6,7 +6,8 @@ public class CameraMover : MonoBehaviour
 
     private void Update()
     {
-        transform.position=new Vector3(_playerPosition.position.x, _playerPosition.position.y,transform.position.z);
+        transform.position=new Vector3(_playerPosition.position.x, 
+            _playerPosition.position.y,transform.position.z);
     }
 }
 
