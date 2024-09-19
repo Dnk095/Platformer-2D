@@ -22,6 +22,4 @@ public class PlayerAnimator : MonoBehaviour
     {
         _animator.SetBool("IsWin", true);
     }
-
-
 }
