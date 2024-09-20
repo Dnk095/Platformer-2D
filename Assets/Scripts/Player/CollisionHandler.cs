@@ -7,9 +7,11 @@ public class CollisionHandler : MonoBehaviour
 {
     [SerializeField] private Wallet _wallet;
     [SerializeField] private PlayerAnimator _animator;
-    [SerializeField] private InputReader _inputReader;
+
+    private Weapon _weapon;
 
     public event Action<string> EndGame;
+    public event Action<int> Attacked;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -18,33 +20,30 @@ public class CollisionHandler : MonoBehaviour
             _wallet.AddMoney();
             monet.Destroy();
         }
+        else if (collision.TryGetComponent(out Weapon weapon))
+        {
+            _weapon = weapon;
+            _weapon.AttackPlayer += OnAttackPlayer;
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        GameObject collisionObject = collision.gameObject;
-
-        if (collisionObject.TryGetComponent(out Finish _))
+        if (collision.gameObject.TryGetComponent(out Finish _))
         {
             Win();
             EndGame?.Invoke("win");
         }
-        else if (collisionObject.TryGetComponent(out Enemy _))
-        {
-            EndGame?.Invoke("die");
-            Die();
-        }
     }
 
-    private void Die()
+    private void OnAttackPlayer(int damage)
     {
-        _animator.Die();
-        _inputReader.enabled = false;
+        Attacked?.Invoke(damage);
+        _weapon.AttackPlayer -= OnAttackPlayer;
     }
 
     private void Win()
     {
         _animator.Win();
-        _inputReader.enabled = false;
     }
 }

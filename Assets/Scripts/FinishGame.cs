@@ -3,17 +3,17 @@ using UnityEngine;
 
 public class FinishGame : MonoBehaviour
 {
-    [SerializeField] private CollisionHandler _handler;
     [SerializeField] private TextMeshProUGUI _text;
+    [SerializeField] private Player _player;
 
     private void OnEnable()
     {
-        _handler.EndGame += OnEndGame;
+        _player.EndGame += OnEndGame;
     }
 
     private void OnDisable()
     {
-        _handler.EndGame -= OnEndGame;
+        _player.EndGame -= OnEndGame;
     }
 
     private void OnEndGame(string text)
