@@ -18,9 +18,10 @@ public class Health : MonoBehaviour
     public void TakeDamage(int damage)
     {
         if (damage > 0)
+        {
             _currentHealth = Mathf.Clamp(_currentHealth - damage, _minHealth, _maxHeath);
-
-        ChangeHeath?.Invoke(_currentHealth, _maxHeath);
+            ChangeHeath?.Invoke(_currentHealth, _maxHeath);
+        }
 
         if (_currentHealth <= 0)
             Die?.Invoke("die");
@@ -29,8 +30,9 @@ public class Health : MonoBehaviour
     public void Heal(int heal)
     {
         if (heal > 0)
+        {
             _currentHealth = Mathf.Clamp(_currentHealth + heal, _minHealth, _maxHeath);
-
-        ChangeHeath?.Invoke(_currentHealth, _maxHeath);
+            ChangeHeath?.Invoke(_currentHealth, _maxHeath);
+        }
     }
 }
