@@ -1,27 +1,33 @@
 using System;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Player : MonoBehaviour
 {
+    [SerializeField] private CollisionHandler _collisionHandler;
     [SerializeField] private GroundDetector _groundDetector;
+    [SerializeField] private PlayerAnimator _playerAnimator;
     [SerializeField] private InputReader _inputReader;
     [SerializeField] private Mover _mover;
     [SerializeField] private LadderMove _ladderMover;
-    [SerializeField] private CollisionHandler _collisionHandler;
     [SerializeField] private Health _health;
 
     public event Action<string> EndGame;
 
     private void OnEnable()
     {
-        _collisionHandler.EndGame += EventReaction;
-        _health.Die += EventReaction;
+        _collisionHandler.WinGame += OnWinGame;
+        _collisionHandler.GetHeal += OnGetHeal;
+        _inputReader.IsAttack += OnIsAttack;
+        _health.Die += OnDie;
     }
 
     private void OnDisable()
     {
-        _health.Die -= EventReaction;
-        _collisionHandler.EndGame -= EventReaction;
+        _collisionHandler.WinGame -= OnWinGame;
+        _collisionHandler.GetHeal -= OnGetHeal;
+        _inputReader.IsAttack -= OnIsAttack;
+        _health.Die -= OnDie;
     }
 
     private void FixedUpdate()
@@ -36,10 +42,32 @@ public class Player : MonoBehaviour
             _mover.Jump();
     }
 
-    private void EventReaction(string text)
+    public void TakeDamage(int damage)
+    {
+        _health.TakeDamage(damage);
+    }
+
+    private void OnDie(string text)
     {
         EndGame?.Invoke(text);
         _inputReader.enabled = false;
+        _playerAnimator.Die();
     }
 
+    private void OnWinGame(string text)
+    {
+        EndGame?.Invoke(text);
+        _inputReader.enabled = false;
+        _playerAnimator.Win();
+    }
+
+    private void OnGetHeal(int heal)
+    {
+        _health.Heal(heal);
+    }
+
+    private void OnIsAttack()
+    {
+        _playerAnimator.Attack();
+    }
 }

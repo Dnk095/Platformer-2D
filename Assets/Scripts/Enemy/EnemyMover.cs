@@ -3,28 +3,13 @@ using UnityEngine;
 public class EnemyMover : MonoBehaviour
 {
     [SerializeField] private Transform[] _targetPoint;
-    [SerializeField] private EnemyCollisionHandler _collisionHandler;
-    [SerializeField] private Eyes _eyes;
     [SerializeField] private float _speed;
 
-    private Vector3 _playerTransform;
+    private Vector3 _targetPosition;
 
     private int _currentPoint = 0;
-
-    private bool _isAttack;
-    private bool _seePlayer;
-
-    private void OnEnable()
-    {
-        _collisionHandler.Attack += OnAttack;
-        _eyes.SeePLayer += OnSee;
-    }
-
-    private void OnDisable()
-    {
-        _collisionHandler.Attack -= OnAttack;
-        _eyes.SeePLayer -= OnSee;
-    }
+    private bool _moveToPLayer = false;
+    private bool _isAttack = false;
 
     private void FixedUpdate()
     {
@@ -33,32 +18,27 @@ public class EnemyMover : MonoBehaviour
             _currentPoint = ++_currentPoint % _targetPoint.Length;
             transform.Rotate(0, 180, 0, Space.World);
         }
-
-        if (_isAttack == false && _seePlayer == false)
+        else if (transform.position == _targetPosition)
         {
-            transform.position = Vector3.MoveTowards(transform.position,
-                _targetPoint[_currentPoint].position, _speed * Time.fixedDeltaTime);
+            _moveToPLayer = false;
         }
-        else if (_seePlayer == true && _isAttack == false)
-        {
-            transform.position = Vector3.MoveTowards(transform.position,
-               _playerTransform, _speed * Time.fixedDeltaTime);
 
-            if (transform.position == _playerTransform)
-            {
-                _seePlayer = false;
-            }
-        }
+        if (_moveToPLayer == false && _isAttack == false)
+            transform.position = Vector3.MoveTowards(transform.position,
+                   _targetPoint[_currentPoint].position, _speed * Time.fixedDeltaTime);
+        else if (_moveToPLayer == true && _isAttack == false)
+            transform.position = Vector3.MoveTowards(transform.position,
+                  _targetPosition, _speed * Time.fixedDeltaTime);
     }
 
-    private void OnAttack(bool attack)
+    public void ChangeTarget(Vector3 position)
     {
-        _isAttack = attack;
+        _targetPosition = new Vector2(position.x, transform.position.y);
+        _moveToPLayer = true;
     }
 
-    private void OnSee(Vector3 position)
+    public void ChangeState(bool isAttack)
     {
-        _playerTransform = position;
-        _seePlayer = true;
+        _isAttack = isAttack;
     }
 }

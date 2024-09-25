@@ -6,12 +6,9 @@ using UnityEngine;
 public class CollisionHandler : MonoBehaviour
 {
     [SerializeField] private Wallet _wallet;
-    [SerializeField] private PlayerAnimator _animator;
 
-    private Weapon _weapon;
-
-    public event Action<string> EndGame;
-    public event Action<int> Attacked;
+    public event Action<string> WinGame;
+    public event Action<int> GetHeal;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -20,30 +17,16 @@ public class CollisionHandler : MonoBehaviour
             _wallet.AddMoney();
             monet.Destroy();
         }
-        else if (collision.TryGetComponent(out Weapon weapon))
+        else if (collision.TryGetComponent(out AidKit aidkit))
         {
-            _weapon = weapon;
-            _weapon.AttackPlayer += OnAttackPlayer;
+            GetHeal?.Invoke(aidkit.Heal);
+            aidkit.Destroy();
         }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.TryGetComponent(out Finish _))
-        {
-            Win();
-            EndGame?.Invoke("win");
-        }
-    }
-
-    private void OnAttackPlayer(int damage)
-    {
-        Attacked?.Invoke(damage);
-        _weapon.AttackPlayer -= OnAttackPlayer;
-    }
-
-    private void Win()
-    {
-        _animator.Win();
+            WinGame?.Invoke("win");
     }
 }

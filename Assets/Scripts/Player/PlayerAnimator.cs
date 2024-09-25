@@ -8,6 +8,7 @@ public class PlayerAnimator : MonoBehaviour
     private int IsWalk = Animator.StringToHash(nameof(IsWalk));
     private int IsDie = Animator.StringToHash(nameof(IsDie));
     private int IsWin = Animator.StringToHash(nameof(IsWin));
+    private int IsAttack = Animator.StringToHash(nameof(IsAttack));
 
     private void FixedUpdate()
     {
@@ -25,5 +26,10 @@ public class PlayerAnimator : MonoBehaviour
     public void Win()
     {
         _animator.SetBool(IsWin, true);
+    }
+
+    public void Attack()
+    {
+        _animator.SetBool(IsAttack, true);
     }
 }

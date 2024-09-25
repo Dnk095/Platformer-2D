@@ -3,11 +3,9 @@ using UnityEngine;
 
 public class Health : MonoBehaviour
 {
-    [SerializeField] private CollisionHandler _collisionHandler;
-    [SerializeField] private PlayerAnimator _playerAnimator;
-
     private int _maxHeath = 100;
-    private int _currentHealth = 100;
+    private int _currentHealth = 50;
+    private int _minHealth = 0;
 
     public event Action<int, int> ChangeHeath;
     public event Action<string> Die;
@@ -17,27 +15,22 @@ public class Health : MonoBehaviour
         ChangeHeath?.Invoke(_currentHealth, _maxHeath);
     }
 
-    private void OnEnable()
+    public void TakeDamage(int damage)
     {
-        _collisionHandler.Attacked += Change;
-    }
-
-    private void OnDisable()
-    {
-        _collisionHandler.Attacked -= Change;
-    }
-
-    public void Change(int damage)
-    {
-        _currentHealth -= damage;
+        if (damage > 0)
+            _currentHealth = Mathf.Clamp(_currentHealth - damage, _minHealth, _maxHeath);
 
         ChangeHeath?.Invoke(_currentHealth, _maxHeath);
 
         if (_currentHealth <= 0)
-        {
             Die?.Invoke("die");
-            _playerAnimator.Die();
-            _collisionHandler.Attacked-=Change;
-        }
+    }
+
+    public void Heal(int heal)
+    {
+        if (heal > 0)
+            _currentHealth = Mathf.Clamp(_currentHealth + heal, _minHealth, _maxHeath);
+
+        ChangeHeath?.Invoke(_currentHealth, _maxHeath);
     }
 }
