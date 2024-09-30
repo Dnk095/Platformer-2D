@@ -10,7 +10,7 @@ public class PlayerAnimator : MonoBehaviour
     private int IsWin = Animator.StringToHash(nameof(IsWin));
     private int IsAttack = Animator.StringToHash(nameof(IsAttack));
 
-    private void FixedUpdate()
+    private void Update()
     {
         if (_inputReader.HorizontalDirection == 0)
             _animator.SetBool(IsWalk, false);

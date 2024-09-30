@@ -1,4 +1,5 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -19,6 +20,7 @@ public class Player : MonoBehaviour
         _collisionHandler.WinGame += OnWinGame;
         _collisionHandler.GetHeal += OnGetHeal;
         _inputReader.IsAttack += OnIsAttack;
+        _collisionHandler.Attack += OnAttack;
         _health.Die += OnDie;
     }
 
@@ -30,7 +32,7 @@ public class Player : MonoBehaviour
         _health.Die -= OnDie;
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
         if (_inputReader.HorizontalDirection != 0)
             _mover.Move(_inputReader.HorizontalDirection);
@@ -69,5 +71,13 @@ public class Player : MonoBehaviour
     private void OnIsAttack()
     {
         _playerAnimator.Attack();
+    }
+
+    private void OnAttack(Enemy enemy)
+    {
+        int damage = 10;
+
+        enemy.TakeDamage(damage);
+        _collisionHandler.Attack -= OnAttack;
     }
 }

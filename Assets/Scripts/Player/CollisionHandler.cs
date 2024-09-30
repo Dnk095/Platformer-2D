@@ -9,6 +9,7 @@ public class CollisionHandler : MonoBehaviour
 
     public event Action<string> WinGame;
     public event Action<int> GetHeal;
+    public event Action<Enemy> Attack;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {

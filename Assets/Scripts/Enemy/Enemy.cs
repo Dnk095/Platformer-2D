@@ -7,6 +7,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] private EnemyMover _enemyMover;
     [SerializeField] private EnemyAnimator _enemyAnimator;
     [SerializeField] private float _attackDistance;
+    [SerializeField] private Health _health;
 
 
     private void OnEnable()
@@ -17,6 +18,11 @@ public class Enemy : MonoBehaviour
     private void OnDisable()
     {
         _eyes.SeePLayer -= OnSee;
+    }
+
+    public void TakeDamage(int damage)
+    {
+        _health.TakeDamage(damage);
     }
 
     private void OnSee(Vector3 position)

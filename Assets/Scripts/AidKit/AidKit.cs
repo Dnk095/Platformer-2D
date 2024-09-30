@@ -3,7 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(PolygonCollider2D))]
 public class AidKit : MonoBehaviour
 {
-    private int _heal = 10;
+    private int _heal = 30;
 
     public int Heal => _heal;
 
