@@ -1,7 +1,5 @@
 using System;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class Player : MonoBehaviour
 {
@@ -12,6 +10,7 @@ public class Player : MonoBehaviour
     [SerializeField] private Mover _mover;
     [SerializeField] private LadderMove _ladderMover;
     [SerializeField] private Health _health;
+    [SerializeField] private Vampire _vampire;
 
     public event Action<string> EndGame;
 
@@ -20,7 +19,7 @@ public class Player : MonoBehaviour
         _collisionHandler.WinGame += OnWinGame;
         _collisionHandler.GetHeal += OnGetHeal;
         _inputReader.IsAttack += OnIsAttack;
-        _collisionHandler.Attack += OnAttack;
+        _vampire.UseSpell += OnUseSpell;
         _health.Die += OnDie;
     }
 
@@ -73,11 +72,8 @@ public class Player : MonoBehaviour
         _playerAnimator.Attack();
     }
 
-    private void OnAttack(Enemy enemy)
+    private void OnUseSpell(int heal)
     {
-        int damage = 10;
-
-        enemy.TakeDamage(damage);
-        _collisionHandler.Attack -= OnAttack;
+        _health.Heal(heal);
     }
 }
