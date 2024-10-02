@@ -10,6 +10,8 @@ public class Health : MonoBehaviour
     public event Action<int, int> ChangeHeath;
     public event Action<string> Die;
 
+    public int CurrentHealth => _currentHealth;
+
     private void Start()
     {
         ChangeHeath?.Invoke(_currentHealth, _maxHeath);

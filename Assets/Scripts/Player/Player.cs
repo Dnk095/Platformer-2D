@@ -19,7 +19,7 @@ public class Player : MonoBehaviour
         _collisionHandler.WinGame += OnWinGame;
         _collisionHandler.GetHeal += OnGetHeal;
         _inputReader.IsAttack += OnIsAttack;
-        _vampire.UseSpell += OnUseSpell;
+        _vampire.Healing += OnHealing;
         _health.Die += OnDie;
     }
 
@@ -28,6 +28,7 @@ public class Player : MonoBehaviour
         _collisionHandler.WinGame -= OnWinGame;
         _collisionHandler.GetHeal -= OnGetHeal;
         _inputReader.IsAttack -= OnIsAttack;
+        _vampire.Healing -= OnHealing;
         _health.Die -= OnDie;
     }
 
@@ -72,7 +73,7 @@ public class Player : MonoBehaviour
         _playerAnimator.Attack();
     }
 
-    private void OnUseSpell(int heal)
+    private void OnHealing(int heal)
     {
         _health.Heal(heal);
     }

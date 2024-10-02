@@ -2,24 +2,24 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(CircleCollider2D))]
 [RequireComponent(typeof(Vampire))]
-public class SpellArea : MonoBehaviour
+public class SpellTarget : MonoBehaviour
 {
-    [SerializeField] private List<Enemy> _enemy;
+    [SerializeField] private List<Enemy> _enemies;
+
     private Vampire _vampire;
     private Enemy _nearestEnemy = null;
 
-    public event Action<Enemy> FindEnemy;
+    public event Action<Enemy> EnemyFound;
 
     private void OnEnable()
     {
-        _vampire.TryGetEnemy += OnUseSpell;
+        _vampire.GetEnemy += OnUseSpell;
     }
 
     private void OnDisable()
     {
-        _vampire.TryGetEnemy -= OnUseSpell;
+        _vampire.GetEnemy -= OnUseSpell;
     }
 
     private void Awake()
@@ -27,40 +27,40 @@ public class SpellArea : MonoBehaviour
         _vampire = GetComponent<Vampire>();
     }
 
-    private void OnUseSpell()
-    {
-        if (_enemy.Count > 0)
-            FindNearestEnemy();
-
-        FindEnemy?.Invoke(_nearestEnemy);
-        _nearestEnemy = null;
-    }
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.TryGetComponent(out Enemy enemy))
-            _enemy.Add(enemy);
+            _enemies.Add(enemy);
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.TryGetComponent(out Enemy enemy))
-            _enemy.Remove(enemy);
+            _enemies.Remove(enemy);
+    }
+
+    private void OnUseSpell()
+    {
+        if (_enemies.Count > 0)
+            FindNearestEnemy();
+
+        EnemyFound?.Invoke(_nearestEnemy);
+        _nearestEnemy = null;
     }
 
     private void FindNearestEnemy()
     {
-        foreach (Enemy enemy in _enemy)
+        foreach (Enemy enemy in _enemies)
         {
             if (_nearestEnemy == null)
                 _nearestEnemy = enemy;
-            else if (GetDistance(enemy.transform) < GetDistance(_nearestEnemy.transform))
+            else if (GetMagnitude(enemy.transform) < GetMagnitude(_nearestEnemy.transform))
                 _nearestEnemy = enemy;
         }
     }
 
-    private float GetDistance(Transform target)
+    private float GetMagnitude(Transform target)
     {
-        return Vector2.Distance(transform.position, target.position);
+        return (target.position - transform.position).sqrMagnitude;
     }
 }

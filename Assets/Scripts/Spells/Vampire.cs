@@ -2,8 +2,9 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(SpriteRenderer))]
-[RequireComponent(typeof(SpellArea))]
+[RequireComponent(typeof(CircleCollider2D))]
+[RequireComponent(typeof(StealHealth))]
+[RequireComponent(typeof(SpellTarget))]
 public class Vampire : MonoBehaviour
 {
     [SerializeField] private SpellsButton _button;
@@ -11,57 +12,60 @@ public class Vampire : MonoBehaviour
     [SerializeField] private int _cooldown = 10;
     [SerializeField] private int _duration = 6;
 
-    private SpriteRenderer _spriteRenderer;
     private CircleCollider2D _circleCollider;
-
-    private SpellArea _area;
-
-    [SerializeField] private Enemy _enemy = null;
+    private SpellTarget _area;
+    private Enemy _enemy = null;
+    private Coroutine _coroutine;
+    private StealHealth _stealHealth;
 
     private bool _onCooldown = false;
     private bool _used = false;
 
-    private Coroutine _coroutine;
 
-    public event Action<int> UseSpell;
+    public event Action<Enemy> UseSpell;
     public event Action<int, int, int> ChangeSpellTimer;
-    public event Action TryGetEnemy;
+    public event Action GetEnemy;
+    public event Action Select;
+    public event Action DeSelect;
+    public event Action<int> Healing;
 
     private void OnEnable()
     {
-        _button.OnClick += GetHealth;
+        _button.OnClick += StealHealth;
         _button.Select += OnSelected;
         _button.DeSelect += OnDeselect;
-        _area.FindEnemy += OnTryGetEnemy;
+        _area.EnemyFound += OnTryGetEnemy;
+        _stealHealth.StealedHealth += OnStealedHealth;
     }
 
     private void OnDisable()
     {
-        _button.OnClick += GetHealth;
+        _button.OnClick -= StealHealth;
         _button.Select -= OnSelected;
         _button.DeSelect -= OnDeselect;
-        _area.FindEnemy -= OnTryGetEnemy;
+        _area.EnemyFound -= OnTryGetEnemy;
+        _stealHealth.StealedHealth -= OnStealedHealth;
     }
 
     private void Awake()
     {
-        _spriteRenderer = GetComponent<SpriteRenderer>();
-        _area = GetComponent<SpellArea>();
         _circleCollider = GetComponent<CircleCollider2D>();
+        _area = GetComponent<SpellTarget>();
+        _stealHealth = GetComponent<StealHealth>();
     }
 
-    private void GetHealth()
+    private void StealHealth()
     {
         if (_coroutine != null && _onCooldown == false)
             StopCoroutine(_coroutine);
 
         if (_onCooldown == false)
-            _coroutine = StartCoroutine(StiilHitPoint());
+            _coroutine = StartCoroutine(StealHitPoint());
     }
 
-    private IEnumerator StiilHitPoint()
+    private IEnumerator StealHitPoint()
     {
-        _circleCollider.enabled = true;
+        Select?.Invoke();
         _onCooldown = true;
         _used = true;
 
@@ -72,18 +76,14 @@ public class Vampire : MonoBehaviour
 
         while (currentDuretion > 0)
         {
-            _spriteRenderer.enabled = true;
+            _circleCollider.enabled = true;
+            Select?.Invoke();
 
-            TryGetEnemy?.Invoke();
+            GetEnemy?.Invoke();
 
             if (_enemy != null)
             {
-                UseSpell?.Invoke(_healthPerSecond);
-                _enemy.TakeDamage(_healthPerSecond);
-            }
-            else
-            {
-                Debug.Log("no enemy");
+                UseSpell?.Invoke(_enemy);
             }
 
             _enemy = null;
@@ -96,6 +96,7 @@ public class Vampire : MonoBehaviour
         }
 
         _circleCollider.enabled = false;
+        DeSelect?.Invoke();
 
         if (_coroutine != null)
             yield return null;
@@ -106,7 +107,7 @@ public class Vampire : MonoBehaviour
 
     private IEnumerator Cooldown()
     {
-        _spriteRenderer.enabled = false;
+        DeSelect?.Invoke();
 
         int delay = 1;
         int currentCooldown = 0;
@@ -127,17 +128,23 @@ public class Vampire : MonoBehaviour
 
     private void OnSelected()
     {
-        _spriteRenderer.enabled = true;
+        Select?.Invoke();
     }
 
     private void OnDeselect()
     {
         if (_used == false)
-            _spriteRenderer.enabled = false;
+            DeSelect?.Invoke();
     }
 
     private void OnTryGetEnemy(Enemy enemy)
     {
         _enemy = enemy;
+    }
+
+    private void OnStealedHealth(int health)
+    {
+        Healing?.Invoke(health);
+        _enemy.TakeDamage(health);
     }
 }
