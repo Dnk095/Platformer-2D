@@ -12,6 +12,11 @@ public class SpellsButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     public event Action DeSelect;
     public event Action OnClick;
 
+    private void Awake()
+    {
+        _button = GetComponent<Button>();
+    }
+
     private void OnEnable()
     {
         _button.onClick.AddListener(Push);
@@ -20,11 +25,6 @@ public class SpellsButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     private void OnDisable()
     {
         _button.onClick.RemoveListener(Push);
-    }
-
-    private void Awake()
-    {
-        _button = GetComponent<Button>();
     }
 
     public void OnPointerEnter(PointerEventData eventData)

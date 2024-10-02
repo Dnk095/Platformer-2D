@@ -2,9 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(CircleCollider2D))]
-[RequireComponent(typeof(StealHealth))]
-[RequireComponent(typeof(SpellTarget))]
+[RequireComponent(typeof(CircleCollider2D), typeof(SpellZone))]
 public class Vampire : MonoBehaviour
 {
     [SerializeField] private SpellsButton _button;
@@ -13,29 +11,28 @@ public class Vampire : MonoBehaviour
     [SerializeField] private int _duration = 6;
 
     private CircleCollider2D _circleCollider;
-    private SpellTarget _area;
-    private Enemy _enemy = null;
+    private SpellZone _spellZone;
     private Coroutine _coroutine;
-    private StealHealth _stealHealth;
 
     private bool _onCooldown = false;
     private bool _used = false;
 
-
-    public event Action<Enemy> UseSpell;
     public event Action<int, int, int> ChangeSpellTimer;
-    public event Action GetEnemy;
+    public event Action<int> Healing;
     public event Action Select;
     public event Action DeSelect;
-    public event Action<int> Healing;
+
+    private void Awake()
+    {
+        _circleCollider = GetComponent<CircleCollider2D>();
+        _spellZone = GetComponent<SpellZone>();
+    }
 
     private void OnEnable()
     {
         _button.OnClick += StealHealth;
         _button.Select += OnSelected;
         _button.DeSelect += OnDeselect;
-        _area.EnemyFound += OnTryGetEnemy;
-        _stealHealth.StealedHealth += OnStealedHealth;
     }
 
     private void OnDisable()
@@ -43,15 +40,6 @@ public class Vampire : MonoBehaviour
         _button.OnClick -= StealHealth;
         _button.Select -= OnSelected;
         _button.DeSelect -= OnDeselect;
-        _area.EnemyFound -= OnTryGetEnemy;
-        _stealHealth.StealedHealth -= OnStealedHealth;
-    }
-
-    private void Awake()
-    {
-        _circleCollider = GetComponent<CircleCollider2D>();
-        _area = GetComponent<SpellTarget>();
-        _stealHealth = GetComponent<StealHealth>();
     }
 
     private void StealHealth()
@@ -70,29 +58,29 @@ public class Vampire : MonoBehaviour
         _used = true;
 
         int delay = 1;
-        int currentDuretion = _duration;
+        int currentDuration = _duration;
 
+        Enemy enemy;
         WaitForSeconds wait = new(delay);
 
-        while (currentDuretion > 0)
+        while (currentDuration > 0)
         {
             _circleCollider.enabled = true;
             Select?.Invoke();
 
-            GetEnemy?.Invoke();
+            enemy = _spellZone.GetEnemy();
 
-            if (_enemy != null)
+            if (enemy != null)
             {
-                UseSpell?.Invoke(_enemy);
+                StealHealth(enemy);
+                enemy = null;
             }
 
-            _enemy = null;
-
-            currentDuretion -= delay;
+            currentDuration -= delay;
 
             yield return wait;
 
-            ChangeSpellTimer(currentDuretion, _duration, _duration / delay);
+            ChangeSpellTimer(currentDuration, _duration, _duration / delay);
         }
 
         _circleCollider.enabled = false;
@@ -137,14 +125,24 @@ public class Vampire : MonoBehaviour
             DeSelect?.Invoke();
     }
 
-    private void OnTryGetEnemy(Enemy enemy)
+    private void StealHealth(Enemy enemy)
     {
-        _enemy = enemy;
+        int health = GetStealedHealth(enemy);
+
+        Healing?.Invoke(health);
+        enemy.TakeDamage(health);
     }
 
-    private void OnStealedHealth(int health)
+    private int GetStealedHealth(Enemy enemy)
     {
-        Healing?.Invoke(health);
-        _enemy.TakeDamage(health);
+        int enemyHealth = 0;
+
+        if (enemy.TryGetComponent(out Health health))
+            enemyHealth = health.CurrentHealth;
+
+        if (enemyHealth < _healthPerSecond)
+            return enemyHealth;
+        else
+            return _healthPerSecond;
     }
 }
